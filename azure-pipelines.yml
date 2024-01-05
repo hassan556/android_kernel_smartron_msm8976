@@ -1,0 +1,47 @@
+# C/C++ with GCC
+# Build your C/C++ project with GCC using make.
+# Add steps that publish test results, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/apps/c-cpp/gcc
+
+trigger:
+- halium-7.1_v3.10.108
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- script: |
+    sudo apt update
+    
+    # Install the dependencies
+    sudo apt install git gnupg flex bison gperf build-essential \
+    zip bzr curl libc6-dev libncurses5-dev:i386 x11proto-core-dev \
+    libx11-dev:i386 libreadline6-dev:i386 libgl1-mesa-glx:i386 \
+    libgl1-mesa-dev g++-multilib mingw-w64-i686-dev tofrodos \
+    python3-markdown libxml2-utils xsltproc zlib1g-dev:i386 schedtool \
+    liblz4-tool bc lzop imagemagick libncurses5 rsync \
+    python-is-python3 python2
+
+    sudo dpkg --add-architecture i386
+    
+    sudo apt update
+
+    mkdir -p ~/bin
+    echo export PATH=\$PATH:\$HOME/bin >> ~/.bashrc
+    source ~/.bashrc
+
+    curl https://storage.googleapis.com/git-repo-downloads/repo > ~/bin/repo
+    chmod a+rx ~/bin/repo
+
+    mkdir halium && cd halium
+
+    repo init -u https://github.com/hassan556/android_kernel_smartron_msm8976.git -b halium-7.1_v3.10.108 --depth=1
+
+    # Build the kernel
+    make ARCH=arm64 -j$(nproc)
+    source build/envsetup.sh
+    breakfast rimo02a
+    mka mkbootimg
+    export USE_HOST_LEX=yes
+    mka halium-boot
+  displayName: 'make'
