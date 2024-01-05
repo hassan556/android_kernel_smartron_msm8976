@@ -38,7 +38,7 @@ steps:
     repo init -u https://github.com/hassan556/android_kernel_smartron_msm8976.git -b halium-7.1_v3.10.108 --depth=1
 
     # Build the kernel
-    make ARCH=arm64 -j$(nproc)
+    # make ARCH=arm64 -j1
     source build/envsetup.sh
     breakfast rimo02a
     mka mkbootimg
